@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Comas Demo SSP</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}"/>
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+    <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            //console.log("ready!");
+            bidRequest();
+        });
+
+        /**
+         * 실시간 입찰 POST Ajax
+         **/
+        function bidRequest() {
+            // 실시간 입찰 요청 데이터 입력 Form input value param 구성
+            var param = $("#bidRequestFrom").serialize();
+            console.log("param=("+param+")");
+
+            $.post("/bid/request",param)
+                .done(function(data) {
+                    console.log(data);
+                    $("#bidResponse").text(JSON.stringify(data,null,'\t'));
+
+                    if(data.seatbid && data.seatbid.length > 0 && data.seatbid[0].bid && data.seatbid[0].bid.length > 0){
+                        bidResult(data);
+                    }
+
+                })
+                .fail(function(e) {
+                    alert("error : " + e.responseText);
+                });
+        }
+
+        /**
+         * 낙찰 결과 전송 POST Ajax
+         **/
+        function bidResult(data) {
+            // 낙찰 결과 param 구성
+            var param = {};
+            param.bidResultUrl = data.seatbid[0].bid[0].nurl.replace("${AUCTION_PRICE}", "4.1"); // 낙찰 금액 USD
+            console.log("param=("+$.param(param)+")");
+            $.post("/bid/result",param)
+                .done(function(data) {
+                    console.log(data);
+                })
+                .fail(function(e) {
+                    //alert("error : " + e.responseText);
+                    console.error("error : " + e.responseText)
+                });
+        }
+    </script>
+</head>
+<body>
+<div class="content-wrap">
+    <div class="content-request">
+        <h3>실시간 입찰 요청 데이터 입력</h3><br/>
+        <!--<h2 th:text="${message}"></h2>-->
+        <form id="bidRequestFrom" name="bidRequestFrom">
+            <input type="hidden" id="id" name="id" th:value="2558e350-fbf7-4da8-a990-10dad85fbbf8" />
+            <input type="hidden" id="param" name="param" th:value="paramValue" />
+            <div class="head_title">
+                <h4 class="subtitle">* 기본 정보</h4>
+                <button class="btn btn-primary" type="submit">Request</button>
+            </div>
+            <table class="table table-bordered">
+                <tr>
+                    <td>낙찰 타입 *</td>
+                    <td><input type="text"></td>
+                    <td>테스트 여부 *</td>
+                    <td><input type="text"></td>
+                    <td>제외 카테고리</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>입찰 최대 지연 시간</td>
+                    <td><input type="text">ms</td>
+                    <td>단위 통화 *</td>
+                    <td><input type="text"></td>
+                    <td>제외 도메인</td>
+                    <td><input type="text"></td>
+                </tr>
+            </table>
+            <h4 class="subtitle">* User 정보 (권장)</h4>
+            <table class="table table-bordered">
+                <tr>
+                    <td>아아디</td>
+                    <td><input type="text"></td>
+                    <td>출생년도 YYYY</td>
+                    <td><input type="text"></td>
+                    <td>성별</td>
+                    <td><input type="text"></td>
+                    <td>키워드</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>위치정보</td>
+                    <td colspan="7"><input type="text" placeholder="위도 입력">
+                        <input type="text" placeholder="경도 입력">
+                        <input type="text" placeholder="출처 입력">
+                        <input type="text" placeholder="국가코드 입력"></td>
+                </tr>
+            </table>
+            <h4 class="subtitle">* Device 정보 (권장)</h4>
+            <table class="table table-bordered">
+                <tr>
+                    <td>Device 종류 *</td>
+                    <td><input type="text"></td>
+                    <td>OS (권장)</td>
+                    <td><input type="text"></td>
+                    <td>OS 버전</td>
+                    <td><input type="text"></td>
+                    <td>U/A (권장)</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>위치 (권장)</td>
+                    <td colspan="7"><input type="text" placeholder="위도 입력">
+                    <input type="text" placeholder="경도 입력">
+                    <input type="text" placeholder="출처 입력">
+                    <input type="text" placeholder="국가코드 입력"></td>
+                </tr>
+                <tr>
+                    <td>추적 금지</td>
+                    <td><input type="text"></td>
+                    <td>IP</td>
+                    <td><input type="text"></td>
+                    <td>제조사</td>
+                    <td><input type="text"></td>
+                    <td>모델</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>언어</td>
+                    <td><input type="text"></td>
+                    <td>높이</td>
+                    <td><input type="text"></td>
+                    <td>넓이</td>
+                    <td><input type="text"></td>
+                    <td>통신사</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>네트워크 종류</td>
+                    <td><input type="text"></td>
+                    <td colspan="2">광고 트래킹 아이디(권장)</td>
+                    <td colspan="4"><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>전면 광고 여부</td>
+                    <td><input type="text"></td>
+                    <td>인벤토리 id</td>
+                    <td><input type="text"></td>
+                    <td>sdk 이름</td>
+                    <td><input type="text"></td>
+                    <td>sdk 버전</td>
+                    <td><input type="text"></td>
+                </tr>
+                <tr>
+                    <td>입찰 최저가</td>
+                    <td><input type="text"></td>
+                    <td>최저가 단위통화</td>
+                    <td><input type="text"></td>
+                    <td>제조사</td>
+                    <td><input type="text"></td>
+                    <td>모델</td>
+                    <td><input type="text"></td>
+                </tr>
+            </table>
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="active"><a href="#banner" data-toggle="tab">Banner *</a></li>
+                <li><a href="#native" data-toggle="tab">Native *</a></li>
+                <li><a href="#video" data-toggle="tab">Video *</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="banner">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>배너 Width *</td>
+                            <td><input type="text">px</td>
+                            <td>배너 Height *</td>
+                            <td><input type="text">px</td>
+                            <td>광고 위치</td>
+                            <td><input type="text"></td>
+                        </tr>
+                        <tr>
+                            <td>제외 광고물 종류</td>
+                            <td><input type="text"></td>
+                            <td>제외 광고물 속성</td>
+                            <td><input type="text"></td>
+                            <td>topframe</td>
+                            <td><input type="text"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="native">
+                    <p>test</p>
+                </div>
+                <div class="tab-pane fade" id="video">
+                    <p>test</p>
+                </div>
+            </div>
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="active"><a href="#site" data-toggle="tab">Site *</a></li>
+                <li><a href="#app" data-toggle="tab">App *</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="site">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td>사이트 ID *</td>
+                            <td><input type="text"></td>
+                            <td>사이트명 *</td>
+                            <td><input type="text"></td>
+                            <td>도메인</td>
+                            <td><input type="text"></td>
+                        </tr>
+                        <tr>
+                            <td>전체 IAB 카테고리</td>
+                            <td><input type="text"></td>
+                            <td>섹션 IAB 카테고리</td>
+                            <td><input type="text"></td>
+                            <td>모바일 여부</td>
+                            <td><input type="text"></td>
+                        </tr>
+                        <tr>
+                            <td>publisher</td>
+                            <td><input type="text"></td>
+                            <td>content</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="app">
+                    <p>test</p>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="content-response">
+        <h3>실시간 입찰 요청 결과</h3><br>
+        <div>
+            <textarea id="bidResponse" name="bidResponse" rows="40" style="width: 100%;"></textarea>
+        </div>
+    </div>
+</div>
+</body>
+</html>
